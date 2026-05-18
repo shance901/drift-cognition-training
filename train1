@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFT COGNITION — Explosive Safety Training</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;600&display=swap');
+
+:root {
+–black: #050608;
+–void: #0a0c10;
+–panel: #0f1218;
+–border: #1e2530;
+–accent: #c8372d;
+–accent2: #e85d1a;
+–warn: #f0b429;
+–green: #2eb87e;
+–muted: #4a5568;
+–mid: #8896aa;
+–light: #c8d4e0;
+–white: #eef2f7;
+–mono: ‘Share Tech Mono’, monospace;
+–cond: ‘Barlow Condensed’, sans-serif;
+–body: ‘Barlow’, sans-serif;
+}
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–black);
+color: var(–light);
+font-family: var(–body);
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* SCANLINE OVERLAY */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background: repeating-linear-gradient(
+0deg,
+transparent,
+transparent 2px,
+rgba(0,0,0,0.08) 2px,
+rgba(0,0,0,0.08) 4px
+);
+pointer-events: none;
+z-index: 9999;
+}
+
+/* HEADER */
+header {
+position: relative;
+padding: 60px 40px 40px;
+border-bottom: 1px solid var(–border);
+overflow: hidden;
+}
+
+header::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 3px;
+background: linear-gradient(90deg, var(–accent), var(–accent2), var(–warn));
+}
+
+.header-grid {
+display: grid;
+grid-template-columns: 1fr auto;
+gap: 20px;
+align-items: start;
+max-width: 1100px;
+margin: 0 auto;
+}
+
+.classification {
+font-family: var(–mono);
+font-size: 10px;
+letter-spacing: 0.3em;
+color: var(–accent);
+margin-bottom: 16px;
+animation: blink 2s step-end infinite;
+}
+
+@keyframes blink {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.4; }
+}
+
+h1 {
+font-family: var(–cond);
+font-weight: 900;
+font-size: clamp(48px, 8vw, 96px);
+line-height: 0.9;
+letter-spacing: -0.02em;
+text-transform: uppercase;
+color: var(–white);
+}
+
+h1 span {
+display: block;
+color: var(–accent);
+}
+
+.header-sub {
+font-family: var(–cond);
+font-weight: 300;
+font-size: 18px;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–mid);
+margin-top: 12px;
+}
+
+.header-meta {
+text-align: right;
+}
+
+.meta-item {
+font-family: var(–mono);
+font-size: 11px;
+color: var(–muted);
+line-height: 2;
+}
+
+.meta-item strong {
+color: var(–warn);
+display: block;
+}
+
+/* DOCTRINE BOX */
+.doctrine {
+max-width: 1100px;
+margin: 40px auto;
+padding: 0 40px;
+}
+
+.doctrine-quote {
+position: relative;
+background: var(–panel);
+border: 1px solid var(–border);
+border-left: 4px solid var(–accent);
+padding: 28px 36px;
+font-family: var(–cond);
+font-size: 24px;
+font-weight: 600;
+letter-spacing: 0.04em;
+color: var(–warn);
+text-transform: uppercase;
+}
+
+.doctrine-quote::after {
+content: ‘CORE DOCTRINE’;
+position: absolute;
+top: -10px;
+right: 20px;
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.3em;
+color: var(–accent);
+background: var(–panel);
+padding: 2px 8px;
+}
+
+/* MAIN GRID */
+main {
+max-width: 1100px;
+margin: 0 auto;
+padding: 20px 40px 80px;
+}
+
+/* SECTION HEADERS */
+.section-label {
+font-family: var(–mono);
+font-size: 10px;
+letter-spacing: 0.4em;
+color: var(–accent);
+text-transform: uppercase;
+margin-bottom: 24px;
+margin-top: 60px;
+display: flex;
+align-items: center;
+gap: 16px;
+}
+
+.section-label::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: var(–border);
+}
+
+/* LAYER CARDS */
+.layers-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 2px;
+margin-bottom: 2px;
+}
+
+.layer-card {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 32px;
+position: relative;
+overflow: hidden;
+cursor: pointer;
+transition: border-color 0.2s, background 0.2s;
+}
+
+.layer-card:hover {
+background: #131820;
+border-color: var(–accent);
+}
+
+.layer-card::before {
+content: attr(data-num);
+position: absolute;
+top: -10px;
+right: 16px;
+font-family: var(–cond);
+font-weight: 900;
+font-size: 120px;
+color: rgba(255,255,255,0.03);
+line-height: 1;
+pointer-events: none;
+}
+
+.layer-tag {
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.3em;
+color: var(–accent);
+margin-bottom: 10px;
+text-transform: uppercase;
+}
+
+.layer-title {
+font-family: var(–cond);
+font-weight: 700;
+font-size: 28px;
+color: var(–white);
+text-transform: uppercase;
+line-height: 1.1;
+margin-bottom: 8px;
+}
+
+.layer-sub {
+font-family: var(–cond);
+font-weight: 300;
+font-size: 15px;
+color: var(–warn);
+letter-spacing: 0.05em;
+margin-bottom: 20px;
+font-style: italic;
+}
+
+.layer-list {
+list-style: none;
+}
+
+.layer-list li {
+font-size: 13px;
+color: var(–mid);
+line-height: 1.8;
+padding-left: 16px;
+position: relative;
+}
+
+.layer-list li::before {
+content: ‘→’;
+position: absolute;
+left: 0;
+color: var(–accent);
+font-family: var(–mono);
+font-size: 11px;
+}
+
+/* DRIFT LOOP */
+.loop-section {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 40px;
+position: relative;
+}
+
+.loop-section::before {
+content: ‘THE DRIFT LOOP — INTERRUPT AT STAGE 1 OR 2’;
+position: absolute;
+top: -10px;
+left: 24px;
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.3em;
+color: var(–warn);
+background: var(–panel);
+padding: 2px 10px;
+}
+
+.loop-stages {
+display: flex;
+align-items: stretch;
+gap: 0;
+margin-top: 20px;
+}
+
+.loop-stage {
+flex: 1;
+position: relative;
+padding: 24px 20px;
+border: 1px solid var(–border);
+text-align: center;
+transition: background 0.2s;
+}
+
+.loop-stage:hover { background: rgba(200,55,45,0.06); }
+
+.loop-stage + .loop-stage {
+border-left: none;
+}
+
+.loop-stage::after {
+content: ‘▶’;
+position: absolute;
+right: -10px;
+top: 50%;
+transform: translateY(-50%);
+color: var(–accent);
+font-size: 12px;
+z-index: 2;
+}
+
+.loop-stage:last-child::after { display: none; }
+
+.stage-num {
+font-family: var(–mono);
+font-size: 9px;
+color: var(–muted);
+letter-spacing: 0.3em;
+margin-bottom: 8px;
+}
+
+.stage-name {
+font-family: var(–cond);
+font-weight: 700;
+font-size: 16px;
+text-transform: uppercase;
+line-height: 1.2;
+margin-bottom: 6px;
+}
+
+.stage-desc {
+font-size: 11px;
+color: var(–mid);
+line-height: 1.5;
+}
+
+.stage-1 .stage-name { color: var(–green); }
+.stage-2 .stage-name { color: var(–warn); }
+.stage-3 .stage-name { color: var(–accent2); }
+.stage-4 .stage-name { color: var(–accent); }
+.stage-5 .stage-name { color: var(–accent); font-size: 20px; }
+
+.stage-5 {
+background: rgba(200,55,45,0.08);
+border-color: var(–accent) !important;
+}
+
+.interrupt-zone {
+margin-top: 20px;
+padding: 14px 20px;
+background: rgba(46,184,126,0.08);
+border: 1px solid rgba(46,184,126,0.3);
+border-left: 3px solid var(–green);
+display: flex;
+align-items: center;
+gap: 16px;
+}
+
+.interrupt-label {
+font-family: var(–mono);
+font-size: 10px;
+letter-spacing: 0.25em;
+color: var(–green);
+white-space: nowrap;
+}
+
+.interrupt-text {
+font-size: 13px;
+color: var(–mid);
+line-height: 1.5;
+}
+
+/* RED FLAGS */
+.redflags-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 2px;
+}
+
+.redflag {
+background: var(–panel);
+border: 1px solid var(–border);
+border-left: 3px solid var(–accent);
+padding: 18px 22px;
+position: relative;
+transition: background 0.2s;
+}
+
+.redflag:hover {
+background: rgba(200,55,45,0.06);
+}
+
+.redflag::before {
+content: ‘⚑’;
+position: absolute;
+top: 16px;
+right: 16px;
+color: var(–accent);
+opacity: 0.4;
+font-size: 14px;
+}
+
+.redflag-quote {
+font-family: var(–cond);
+font-size: 15px;
+font-style: italic;
+color: var(–warn);
+margin-bottom: 6px;
+}
+
+.redflag-type {
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.25em;
+color: var(–muted);
+}
+
+/* TRAINING OBJECTIVES */
+.objectives-grid {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr;
+gap: 2px;
+}
+
+.objective {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 28px 24px;
+position: relative;
+overflow: hidden;
+transition: background 0.2s, border-color 0.2s;
+}
+
+.objective:hover {
+background: #131820;
+border-color: var(–accent2);
+}
+
+.obj-icon {
+font-size: 28px;
+margin-bottom: 12px;
+display: block;
+}
+
+.obj-title {
+font-family: var(–cond);
+font-weight: 700;
+font-size: 18px;
+text-transform: uppercase;
+color: var(–white);
+margin-bottom: 8px;
+letter-spacing: 0.05em;
+}
+
+.obj-desc {
+font-size: 13px;
+color: var(–mid);
+line-height: 1.7;
+}
+
+/* ACCUMULATION */
+.accum-section {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 40px;
+}
+
+.accum-chain {
+display: flex;
+flex-direction: column;
+gap: 0;
+margin-top: 24px;
+}
+
+.chain-item {
+display: flex;
+align-items: flex-start;
+gap: 20px;
+padding: 16px 0;
+border-bottom: 1px solid var(–border);
+position: relative;
+animation: fadeIn 0.5s ease both;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateX(-10px); }
+to { opacity: 1; transform: translateX(0); }
+}
+
+.chain-item:last-child { border-bottom: none; }
+
+.chain-dot {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+border: 2px solid;
+display: flex;
+align-items: center;
+justify-content: center;
+font-family: var(–mono);
+font-size: 11px;
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.chain-item:nth-child(1) .chain-dot { border-color: var(–green); color: var(–green); }
+.chain-item:nth-child(2) .chain-dot { border-color: var(–warn); color: var(–warn); }
+.chain-item:nth-child(3) .chain-dot { border-color: var(–accent2); color: var(–accent2); }
+.chain-item:nth-child(4) .chain-dot { border-color: var(–accent); color: var(–accent); background: rgba(200,55,45,0.1); }
+
+.chain-body {}
+
+.chain-label {
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.3em;
+color: var(–muted);
+margin-bottom: 4px;
+}
+
+.chain-text {
+font-family: var(–cond);
+font-size: 18px;
+color: var(–light);
+line-height: 1.3;
+}
+
+.chain-arrow {
+margin-left: 16px;
+text-align: center;
+color: var(–accent);
+font-size: 18px;
+padding: 4px 0;
+font-family: var(–mono);
+display: block;
+}
+
+/* QUIZ SECTION */
+.quiz-section {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 40px;
+position: relative;
+}
+
+.quiz-section::before {
+content: ‘COMPETENCY CHECK’;
+position: absolute;
+top: -10px;
+left: 24px;
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.3em;
+color: var(–accent);
+background: var(–panel);
+padding: 2px 10px;
+}
+
+.quiz-q {
+margin-bottom: 32px;
+}
+
+.quiz-text {
+font-family: var(–cond);
+font-size: 20px;
+font-weight: 600;
+color: var(–white);
+margin-bottom: 16px;
+}
+
+.quiz-options {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.quiz-option {
+background: transparent;
+border: 1px solid var(–border);
+color: var(–mid);
+padding: 12px 18px;
+text-align: left;
+font-family: var(–body);
+font-size: 14px;
+cursor: pointer;
+transition: all 0.15s;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.quiz-option:hover {
+background: rgba(255,255,255,0.03);
+border-color: var(–mid);
+color: var(–light);
+}
+
+.quiz-option.correct {
+background: rgba(46,184,126,0.1);
+border-color: var(–green);
+color: var(–green);
+}
+
+.quiz-option.wrong {
+background: rgba(200,55,45,0.1);
+border-color: var(–accent);
+color: var(–accent);
+}
+
+.quiz-option.disabled {
+cursor: default;
+pointer-events: none;
+}
+
+.opt-letter {
+font-family: var(–mono);
+font-size: 10px;
+width: 20px;
+flex-shrink: 0;
+color: var(–muted);
+}
+
+.feedback {
+margin-top: 12px;
+padding: 12px 16px;
+font-size: 13px;
+border-left: 3px solid;
+display: none;
+line-height: 1.6;
+}
+
+.feedback.show { display: block; }
+.feedback.correct-fb { border-color: var(–green); color: var(–green); background: rgba(46,184,126,0.06); }
+.feedback.wrong-fb { border-color: var(–accent); color: var(–accent); background: rgba(200,55,45,0.06); }
+
+/* FOOTER */
+footer {
+border-top: 1px solid var(–border);
+padding: 24px 40px;
+max-width: 1100px;
+margin: 0 auto;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.footer-text {
+font-family: var(–mono);
+font-size: 10px;
+color: var(–muted);
+letter-spacing: 0.2em;
+}
+
+.progress-bar {
+height: 3px;
+background: var(–border);
+width: 200px;
+position: relative;
+overflow: hidden;
+}
+
+.progress-fill {
+height: 100%;
+background: linear-gradient(90deg, var(–accent), var(–warn));
+transition: width 0.3s ease;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+header, .doctrine, main { padding-left: 20px; padding-right: 20px; }
+.header-grid { grid-template-columns: 1fr; }
+.header-meta { text-align: left; }
+h1 { font-size: 52px; }
+.layers-grid { grid-template-columns: 1fr; }
+.loop-stages { flex-direction: column; }
+.loop-stage::after { display: none; }
+.objectives-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="header-grid">
+    <div>
+      <div class="classification">⬛ EXPLOSIVE SAFETY — COGNITIVE TRAINING MODULE 04</div>
+      <h1>DRIFT<span>COGNITION</span></h1>
+      <p class="header-sub">Sensing invisible degradation before it becomes a headline</p>
+    </div>
+    <div class="header-meta">
+      <div class="meta-item"><strong>MODULE</strong>DC-04</div>
+      <div class="meta-item"><strong>TARGET</strong>Warrants &amp; Safety Officers</div>
+      <div class="meta-item"><strong>TIMEFRAME</strong>2030–2050 Operations</div>
+    </div>
+  </div>
+</header>
+
+<div class="doctrine">
+  <div class="doctrine-quote">
+    "Systems fail slowly, then all at once."
+  </div>
+</div>
+
+<main>
+
+  <!-- FOUR LAYERS -->
+
+  <div class="section-label">FOUR COGNITIVE LAYERS</div>
+
+  <div class="layers-grid">
+
+```
+<div class="layer-card" data-num="01">
+  <div class="layer-tag">Layer 01 — Entry Detection</div>
+  <div class="layer-title">Drift Awareness</div>
+  <div class="layer-sub">"This used to be different."</div>
+  <ul class="layer-list">
+    <li>Shortcuts become normal</li>
+    <li>Documentation becomes ritual</li>
+    <li>Inspections become predictable</li>
+    <li>Contractors become comfortable</li>
+    <li>"Temporary" becomes permanent</li>
+    <li>Leadership turnover erases memory</li>
+    <li>Assumptions replace verification</li>
+  </ul>
+</div>
+
+<div class="layer-card" data-num="02">
+  <div class="layer-tag">Layer 02 — Pattern Recognition</div>
+  <div class="layer-title">Drift Pattern Recognition</div>
+  <div class="layer-sub">"I've seen this movie before."</div>
+  <ul class="layer-list">
+    <li><strong style="color:var(--warn)">Inspection Drift</strong> — fewer eyes, fewer questions</li>
+    <li><strong style="color:var(--warn)">Contractor Drift</strong> — selective transparency</li>
+    <li><strong style="color:var(--warn)">Storage Drift</strong> — undocumented accumulation</li>
+    <li><strong style="color:var(--warn)">Leadership Drift</strong> — new leaders, old hazards</li>
+    <li><strong style="color:var(--warn)">Cultural Drift</strong> — "we've always done it this way"</li>
+    <li><strong style="color:var(--warn)">Documentation Drift</strong> — copy-paste risk assessments</li>
+  </ul>
+</div>
+
+<div class="layer-card" data-num="03">
+  <div class="layer-tag">Layer 03 — Compounding Effects</div>
+  <div class="layer-title">Drift Accumulation</div>
+  <div class="layer-sub">"One deviation is survivable. Ten are lethal."</div>
+  <ul class="layer-list">
+    <li>One shortcut becomes two</li>
+    <li>Two become four</li>
+    <li>Four become the new normal</li>
+    <li>Deviations compound exponentially</li>
+    <li>How Minden and Tennessee happened</li>
+  </ul>
+</div>
+
+<div class="layer-card" data-num="04">
+  <div class="layer-tag">Layer 04 — Anticipatory Safety</div>
+  <div class="layer-title">Consequence Cognition</div>
+  <div class="layer-sub">"If this continues, someone dies."</div>
+  <ul class="layer-list">
+    <li>Model second- and third-order effects</li>
+    <li>Map cascading failures</li>
+    <li>Identify hidden dependencies</li>
+    <li>Anticipate contractor deception</li>
+    <li>Predict inspection blind spots</li>
+    <li>Surface leadership ignorance before catastrophe</li>
+  </ul>
+</div>
+```
+
+  </div>
+
+  <!-- DRIFT ACCUMULATION CHAIN -->
+
+  <div class="section-label">DRIFT ACCUMULATION — LIVE EXAMPLE</div>
+  <div class="accum-section">
+    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.2em;margin-bottom:8px;">CASE: UNINSPECTED BUILDING PATHWAY TO CATASTROPHE</div>
+    <div class="accum-chain">
+      <div class="chain-item">
+        <div class="chain-dot">1×</div>
+        <div class="chain-body">
+          <div class="chain-label">DEVIATION — INITIAL EVENT</div>
+          <div class="chain-text">A building goes uninspected once due to schedule pressure</div>
+        </div>
+      </div>
+      <span class="chain-arrow">↓ normalizes</span>
+      <div class="chain-item">
+        <div class="chain-dot">2×</div>
+        <div class="chain-body">
+          <div class="chain-label">NORMALIZATION — DRIFT PHASE</div>
+          <div class="chain-text">That building becomes "low priority" — it doesn't need inspection</div>
+        </div>
+      </div>
+      <span class="chain-arrow">↓ institutionalizes</span>
+      <div class="chain-item">
+        <div class="chain-dot">4×</div>
+        <div class="chain-body">
+          <div class="chain-label">INSTITUTIONALIZATION — DOCTRINE PHASE</div>
+          <div class="chain-text">Successive leaders inherit the assumption: "not required"</div>
+        </div>
+      </div>
+      <span class="chain-arrow">↓ collapses</span>
+      <div class="chain-item">
+        <div class="chain-dot" style="font-size:14px;">⚡</div>
+        <div class="chain-body">
+          <div class="chain-label">CATASTROPHE — TERMINAL EVENT</div>
+          <div class="chain-text">Never inspected. Contains unknown hazard. Detonation. Casualties.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRIFT LOOP -->
+
+  <div class="section-label">THE DRIFT COGNITION LOOP</div>
+  <div class="loop-section">
+    <div class="loop-stages">
+      <div class="loop-stage stage-1">
+        <div class="stage-num">STAGE 01</div>
+        <div class="stage-name">Deviation</div>
+        <div class="stage-desc">A shortcut or assumption is introduced</div>
+      </div>
+      <div class="loop-stage stage-2">
+        <div class="stage-num">STAGE 02</div>
+        <div class="stage-name">Normalization</div>
+        <div class="stage-desc">"This is fine" — repeated without challenge</div>
+      </div>
+      <div class="loop-stage stage-3">
+        <div class="stage-num">STAGE 03</div>
+        <div class="stage-name">Institutional­ization</div>
+        <div class="stage-desc">"This is how we do it" — becomes doctrine</div>
+      </div>
+      <div class="loop-stage stage-4">
+        <div class="stage-num">STAGE 04</div>
+        <div class="stage-name">Blindness</div>
+        <div class="stage-desc">No one remembers the original standard</div>
+      </div>
+      <div class="loop-stage stage-5">
+        <div class="stage-num">STAGE 05</div>
+        <div class="stage-name">☠ Catastrophe</div>
+        <div class="stage-desc">System collapses. Event occurs.</div>
+      </div>
+    </div>
+    <div class="interrupt-zone">
+      <div class="interrupt-label">▶ INTERRUPT WINDOW</div>
+      <div class="interrupt-text">Doctrine requires leaders to interrupt at <strong style="color:var(--green)">Stage 1 or 2</strong> — before normalization locks in. After Stage 3, drift becomes self-concealing. After Stage 4, the hazard is invisible to new leadership. Stage 5 is too late.</div>
+    </div>
+  </div>
+
+  <!-- RED FLAGS -->
+
+  <div class="section-label">DRIFT RED FLAGS — AUDIBLE SIGNATURES</div>
+  <div class="redflags-grid">
+    <div class="redflag">
+      <div class="redflag-quote">"We don't need to inspect that building."</div>
+      <div class="redflag-type">INSPECTION DRIFT / NORMALIZATION</div>
+    </div>
+    <div class="redflag">
+      <div class="redflag-quote">"The contractor said it's empty."</div>
+      <div class="redflag-type">CONTRACTOR DRIFT / UNVERIFIED CLAIM</div>
+    </div>
+    <div class="redflag">
+      <div class="redflag-quote">"We've never had a problem there."</div>
+      <div class="redflag-type">SURVIVORSHIP BIAS / INSTITUTIONAL BLINDNESS</div>
+    </div>
+    <div class="redflag">
+      <div class="redflag-quote">"We don't have time for that."</div>
+      <div class="redflag-type">SCHEDULE PRESSURE / NORMALIZATION TRIGGER</div>
+    </div>
+    <div class="redflag">
+      <div class="redflag-quote">"We'll fix it next rotation."</div>
+      <div class="redflag-type">DEFERRAL DRIFT / LEADERSHIP HANDOFF RISK</div>
+    </div>
+    <div class="redflag">
+      <div class="redflag-quote">"That's not my lane."</div>
+      <div class="redflag-type">CULTURAL DRIFT / RESPONSIBILITY DIFFUSION</div>
+    </div>
+    <div class="redflag">
+      <div class="redflag-quote">"We've always done it this way."</div>
+      <div class="redflag-type">DOCUMENTATION DRIFT / MEMORY ERASURE</div>
+    </div>
+    <div class="redflag">
+      <div class="redflag-quote">"The last guy didn't worry about it."</div>
+      <div class="redflag-type">LEADERSHIP DRIFT / TACIT KNOWLEDGE LOSS</div>
+    </div>
+  </div>
+
+  <!-- TRAINING OBJECTIVES -->
+
+  <div class="section-label">TRAINING OBJECTIVES — FUTURE WARRANTS &amp; SAFETY OFFICERS</div>
+  <div class="objectives-grid">
+    <div class="objective">
+      <span class="obj-icon">🔍</span>
+      <div class="obj-title">Detect Drift Early</div>
+      <div class="obj-desc">Identify Stage 1 and Stage 2 signals before they normalize. Recognize deviations before they become doctrine.</div>
+    </div>
+    <div class="objective">
+      <span class="obj-icon">🗺</span>
+      <div class="obj-title">Map Drift Patterns</div>
+      <div class="obj-desc">Classify drift by type: Inspection, Contractor, Storage, Leadership, Cultural, Documentation. Know the signatures of each.</div>
+    </div>
+    <div class="objective">
+      <span class="obj-icon">⚡</span>
+      <div class="obj-title">Identify Accelerators</div>
+      <div class="obj-desc">Recognize conditions that speed up drift: leadership turnover, contractor familiarity, schedule pressure, undocumented assumptions.</div>
+    </div>
+    <div class="objective">
+      <span class="obj-icon">🎯</span>
+      <div class="obj-title">Predict Consequences</div>
+      <div class="obj-desc">Mentally simulate second- and third-order effects. Project where current drift leads in 6 months, 2 years, next rotation.</div>
+    </div>
+    <div class="objective">
+      <span class="obj-icon">🛑</span>
+      <div class="obj-title">Intervene Before Doctrine</div>
+      <div class="obj-desc">Develop the institutional courage and situational authority to interrupt drift at Stage 1 or 2 — before it becomes "the way we do it."</div>
+    </div>
+    <div class="objective">
+      <span class="obj-icon">📋</span>
+      <div class="obj-title">Document for Successors</div>
+      <div class="obj-desc">Capture tacit knowledge before leadership turnover. Ensure the next commander inherits hazard awareness, not just hazard blindness.</div>
+    </div>
+  </div>
+
+  <!-- COMPETENCY CHECK -->
+
+  <div class="section-label">COMPETENCY CHECK</div>
+  <div class="quiz-section">
+
+```
+<div class="quiz-q" id="q1">
+  <div class="quiz-text">Q1 — A contractor tells a new safety officer, "Don't worry about Building 7, we never inspect that one." This is a signature of which drift type?</div>
+  <div class="quiz-options">
+    <button class="quiz-option" onclick="answer(this,'q1',false,'A')"><span class="opt-letter">A</span>Storage Drift — undocumented accumulation of materials</button>
+    <button class="quiz-option" onclick="answer(this,'q1',true,'B')"><span class="opt-letter">B</span>Contractor Drift combined with Inspection Drift — selective transparency + normalized non-inspection</button>
+    <button class="quiz-option" onclick="answer(this,'q1',false,'C')"><span class="opt-letter">C</span>Documentation Drift — copy-paste risk assessments</button>
+    <button class="quiz-option" onclick="answer(this,'q1',false,'D')"><span class="opt-letter">D</span>Cultural Drift only — this is just how the unit operates</button>
+  </div>
+  <div class="feedback" id="q1-fb"></div>
+</div>
+
+<div class="quiz-q" id="q2">
+  <div class="quiz-text">Q2 — At what stage of the Drift Loop is intervention most effective, and why?</div>
+  <div class="quiz-options">
+    <button class="quiz-option" onclick="answer(this,'q2',false,'A')"><span class="opt-letter">A</span>Stage 4 — because the problem is fully visible by then</button>
+    <button class="quiz-option" onclick="answer(this,'q2',false,'B')"><span class="opt-letter">B</span>Stage 5 — because the event forces corrective action</button>
+    <button class="quiz-option" onclick="answer(this,'q2',true,'C')"><span class="opt-letter">C</span>Stage 1 or 2 — before normalization institutionalizes the deviation as doctrine</button>
+    <button class="quiz-option" onclick="answer(this,'q2',false,'D')"><span class="opt-letter">D</span>Stage 3 — because leadership can still be briefed</button>
+  </div>
+  <div class="feedback" id="q2-fb"></div>
+</div>
+
+<div class="quiz-q" id="q3">
+  <div class="quiz-text">Q3 — A storage area is "temporarily" overloaded during a surge. Three rotations later, no one knows the original safe load limit. This exemplifies which principle?</div>
+  <div class="quiz-options">
+    <button class="quiz-option" onclick="answer(this,'q3',false,'A')"><span class="opt-letter">A</span>Single-point failure — one deviation caused the hazard</button>
+    <button class="quiz-option" onclick="answer(this,'q3',false,'B')"><span class="opt-letter">B</span>Leadership failure — the commander should have known</button>
+    <button class="quiz-option" onclick="answer(this,'q3',true,'C')"><span class="opt-letter">C</span>Drift Accumulation — temporary becomes permanent becomes invisible becomes catastrophic</button>
+    <button class="quiz-option" onclick="answer(this,'q3',false,'D')"><span class="opt-letter">D</span>Documentation Drift only — a recordkeeping problem</button>
+  </div>
+  <div class="feedback" id="q3-fb"></div>
+</div>
+```
+
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-text">DRIFT COGNITION MODULE DC-04 — EXPLOSIVE SAFETY TRAINING</div>
+  <div>
+    <div class="footer-text" style="margin-bottom:6px;text-align:right" id="score-label">COMPETENCY: —</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  </div>
+</footer>
+
+<script>
+  const answers = {};
+  const correct = { q1: 'B', q2: 'C', q3: 'C' };
+  const feedback = {
+    q1: {
+      B: "Correct. This is a dual signature: the contractor is exercising selective transparency (Contractor Drift) and the non-inspection has been normalized into a standing expectation (Inspection Drift). Both are active simultaneously — a compounding pattern.",
+      default: "Not quite. The contractor's instruction not to inspect, combined with the framing that it's never inspected, shows both Contractor Drift (hiding information) and Inspection Drift (normalized non-inspection working together."
+    },
+    q2: {
+      C: "Correct. Stages 1 and 2 are the intervention window. After Stage 2, normalization begins hardening. By Stage 3 the deviation becomes doctrine. By Stage 4 it becomes invisible. At Stage 5, someone is already dead.",
+      default: "Incorrect. The intervention must occur at Stage 1 (Deviation) or Stage 2 (Normalization). Once drift reaches Stage 3, it has been institutionalized and new leaders will inherit it as the standard — they won't even know a deviation occurred."
+    },
+    q3: {
+      C: "Correct. This is the textbook Drift Accumulation pathway: temporary → routine → invisible → catastrophic. Each rotation inherited the overload as the baseline. The original standard was erased without anyone making a deliberate decision to erase it.",
+      default: "Incorrect. This is Drift Accumulation — the compounding of a single temporary deviation across multiple rotations until the original standard is completely lost. No single person decided to allow the overload permanently. It became invisible through accumulation."
+    }
+  };
+
+  function answer(btn, qid, isCorrect, letter) {
+    if (answers[qid]) return;
+    answers[qid] = letter;
+
+    const container = document.getElementById(qid);
+    const allBtns = container.querySelectorAll('.quiz-option');
+    const fb = document.getElementById(qid + '-fb');
+
+    allBtns.forEach(b => b.classList.add('disabled'));
+
+    if (isCorrect) {
+      btn.classList.add('correct');
+      fb.textContent = feedback[qid][letter];
+      fb.className = 'feedback show correct-fb';
+    } else {
+      btn.classList.add('wrong');
+      const correctText = feedback[qid].default;
+      fb.textContent = correctText;
+      fb.className = 'feedback show wrong-fb';
+      // Highlight correct answer
+      allBtns.forEach(b => {
+        if (b.querySelector('.opt-letter').textContent === correct[qid]) {
+          b.classList.add('correct');
+        }
+      });
+    }
+
+    updateScore();
+  }
+
+  function updateScore() {
+    const total = Object.keys(correct).length;
+    const done = Object.keys(answers).length;
+    let score = 0;
+    for (const q in answers) {
+      if (answers[q] === correct[q]) score++;
+    }
+    const pct = Math.round((done / total) * 100);
+    document.getElementById('progress').style.width = pct + '%';
+    if (done === total) {
+      document.getElementById('score-label').textContent = `SCORE: ${score}/${total}`;
+    }
+  }
+</script>
+
+</body>
+</html>
