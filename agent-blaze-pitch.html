@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Blaze — Regulatory Intelligence Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;600;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0d0d0f;
+    --surface:  #141417;
+    --border:   #2a2a30;
+    --red:      #bf3228;
+    --red-dim:  #7a1f18;
+    --orange:   #d4721a;
+    --green:    #2a7a4b;
+    --text:     #e8e8ec;
+    --muted:    #6b6b78;
+    --accent:   #4a6cf7;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: 'Epilogue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+
+  /* ── DECK SHELL ─────────────────────────────────────── */
+  #deck {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .slide {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn .35s ease;
+  }
+  .slide.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── NAVIGATION ─────────────────────────────────────── */
+  #nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .75rem 2rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  #nav button {
+    font-family: 'DM Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .08em;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: .4rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  #nav button:hover { border-color: var(--red); color: var(--text); }
+  #nav button:disabled { opacity: .3; cursor: default; }
+
+  #slide-counter {
+    font-family: 'DM Mono', monospace;
+    font-size: .75rem;
+    color: var(--muted);
+    letter-spacing: .1em;
+  }
+
+  #progress-bar {
+    height: 2px;
+    background: var(--border);
+    flex: 1;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #progress-fill {
+    height: 100%;
+    background: var(--red);
+    border-radius: 2px;
+    transition: width .3s ease;
+  }
+
+  /* ── COMMON SLIDE PARTS ─────────────────────────────── */
+  .slide-label {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .18em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .slide-title {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    text-align: center;
+    margin-bottom: .75rem;
+  }
+
+  .slide-sub {
+    font-size: clamp(.9rem, 1.5vw, 1.15rem);
+    color: var(--muted);
+    text-align: center;
+    max-width: 700px;
+    line-height: 1.6;
+  }
+
+  .red  { color: var(--red); }
+  .muted { color: var(--muted); }
+  .mono {
+    font-family: 'DM Mono', monospace;
+    font-size: .8em;
+    letter-spacing: .04em;
+  }
+
+  /* ── GRID LAYOUTS ───────────────────────────────────── */
+  .card-grid {
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 2rem;
+  }
+  .card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.4rem;
+  }
+  .card.red-border { border-color: var(--red-dim); }
+  .card.accent-border { border-color: #2a3a7a; }
+
+  .card-icon {
+    font-size: 1.4rem;
+    margin-bottom: .6rem;
+  }
+
+  .card-head {
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    margin-bottom: .4rem;
+    text-transform: uppercase;
+  }
+
+  .card-body {
+    font-size: .82rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* ── STAT ROW ───────────────────────────────────────── */
+  .stat-row {
+    display: flex;
+    gap: 2.5rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 900;
+    color: var(--red);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: .3rem;
+  }
+
+  /* ── TWO-COLUMN COMPARE ─────────────────────────────── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 2rem;
+  }
+
+  .compare-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.4rem;
+  }
+  .compare-col.bad  { border-color: var(--red-dim); }
+  .compare-col.good { border-color: #1a4a2e; }
+
+  .compare-head {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .compare-col.bad  .compare-head { color: var(--red); }
+  .compare-col.good .compare-head { color: var(--green); }
+
+  .compare-item {
+    font-size: .84rem;
+    color: var(--muted);
+    line-height: 1.5;
+    padding: .4rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: .6rem;
+    align-items: flex-start;
+  }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item .dot { flex-shrink: 0; font-size: .6rem; margin-top: .3rem; }
+  .compare-col.bad  .dot { color: var(--red); }
+  .compare-col.good .dot { color: var(--green); }
+
+  /* ── PHASE TIMELINE ─────────────────────────────────── */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 2rem;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 2px;
+    background: var(--border);
+  }
+
+  .phase {
+    text-align: center;
+    padding: 0 .75rem;
+    position: relative;
+  }
+
+  .phase-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--red);
+    margin: 0 auto 1rem;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 12px var(--red);
+  }
+  .phase:nth-child(2) .phase-dot { background: var(--orange); box-shadow: 0 0 12px var(--orange); }
+  .phase:nth-child(3) .phase-dot { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  .phase:nth-child(4) .phase-dot { background: var(--green); box-shadow: 0 0 12px var(--green); }
+
+  .phase-num {
+    font-family: 'DM Mono', monospace;
+    font-size: .6rem;
+    letter-spacing: .15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: .3rem;
+  }
+
+  .phase-time {
+    font-size: .78rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+  .phase:nth-child(1) .phase-time { color: var(--red); }
+  .phase:nth-child(2) .phase-time { color: var(--orange); }
+  .phase:nth-child(3) .phase-time { color: var(--accent); }
+  .phase:nth-child(4) .phase-time { color: var(--green); }
+
+  .phase-desc {
+    font-size: .75rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── METRICS ────────────────────────────────────────── */
+  .metric-list {
+    width: 100%;
+    max-width: 780px;
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    align-items: center;
+    gap: 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .85rem 1.1rem;
+  }
+
+  .metric-label {
+    font-size: .78rem;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+
+  .metric-bar-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .metric-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--red);
+  }
+
+  .metric-val {
+    font-family: 'DM Mono', monospace;
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--red);
+    white-space: nowrap;
+  }
+
+  /* ── ROI TABLE ──────────────────────────────────────── */
+  .roi-table {
+    width: 100%;
+    max-width: 820px;
+    margin-top: 1.5rem;
+    border-collapse: collapse;
+    font-size: .82rem;
+  }
+
+  .roi-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: .5rem .8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .roi-table td {
+    padding: .7rem .8rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .roi-table tr:last-child td { border-bottom: none; }
+
+  .roi-table .highlight {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  /* ── CASCADE LOOP ───────────────────────────────────── */
+  .loop {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 2rem;
+    max-width: 1000px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .loop-step {
+    flex: 1;
+    text-align: center;
+    padding: 1rem .5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .loop-step::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 1rem;
+    z-index: 1;
+  }
+  .loop-step:last-child::after { display: none; }
+
+  .loop-step.danger { border-color: var(--red-dim); background: #1a0c0b; }
+
+  .loop-num {
+    font-family: 'DM Mono', monospace;
+    font-size: .6rem;
+    color: var(--muted);
+    letter-spacing: .12em;
+  }
+
+  .loop-name {
+    font-size: .78rem;
+    font-weight: 700;
+    margin: .2rem 0;
+  }
+
+  .loop-step.danger .loop-name { color: var(--red); }
+
+  .loop-desc {
+    font-size: .66rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ── INTERRUPT BADGE ────────────────────────────────── */
+  .interrupt {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: #1a0c0b;
+    border: 1px solid var(--red);
+    border-radius: 4px;
+    padding: .5rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: .72rem;
+    color: var(--red);
+    letter-spacing: .08em;
+    margin-top: 1.2rem;
+  }
+
+  /* ── QUOTE BLOCK ────────────────────────────────────── */
+  .quote {
+    border-left: 3px solid var(--red);
+    padding: .8rem 1.2rem;
+    margin: 1.5rem auto;
+    max-width: 700px;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── SLIDE-SPECIFIC BACKGROUNDS ─────────────────────── */
+  #slide-1 { background: radial-gradient(ellipse at 60% 40%, #1a0c0b 0%, var(--bg) 70%); }
+  #slide-12 { background: radial-gradient(ellipse at 50% 50%, #0d1a2a 0%, var(--bg) 70%); }
+
+  /* ── CLASSIFICATION BANNER ──────────────────────────── */
+  .classification {
+    position: absolute;
+    top: .5rem;
+    right: 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: .6rem;
+    letter-spacing: .14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    padding: .2rem .6rem;
+    border-radius: 3px;
+  }
+
+  /* ── BLAZE WORDMARK ─────────────────────────────────── */
+  .wordmark {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .2em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+
+  /* ── BIG STATEMENT ──────────────────────────────────── */
+  .big-statement {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 900;
+    line-height: 1.15;
+    text-align: center;
+    max-width: 800px;
+    letter-spacing: -.01em;
+  }
+
+  /* ── PILL TAGS ──────────────────────────────────────── */
+  .tags {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .3rem .8rem;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .tag.red { border-color: var(--red-dim); color: var(--red); background: #1a0c0b; }
+  .tag.blue { border-color: #2a3a7a; color: var(--accent); background: #0d1020; }
+  .tag.green { border-color: #1a4a2e; color: var(--green); background: #0a1510; }
+
+  /* ── BLAZE LOGO TEXT ────────────────────────────────── */
+  .blaze-logo {
+    font-size: clamp(4rem, 8vw, 6.5rem);
+    font-weight: 900;
+    letter-spacing: -.04em;
+    line-height: 1;
+    background: linear-gradient(135deg, #bf3228 0%, #e85d2a 60%, #f0a040 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: .5rem;
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- ── SLIDE 01: TITLE ─────────────────────────────── -->
+  <div class="slide active" id="slide-1">
+    <div class="classification">For Official Use Only</div>
+    <div class="wordmark">Agent</div>
+    <div class="blaze-logo">BLAZE</div>
+    <div class="slide-sub" style="font-size:1rem; margin-top:.5rem;">
+      Regulatory Intelligence Agent for Strategic Risk Prevention
+    </div>
+    <div class="tags" style="margin-top:2rem;">
+      <span class="tag red">Explosive Safety</span>
+      <span class="tag red">Munitions Operations</span>
+      <span class="tag blue">AI-Powered</span>
+      <span class="tag">Army First</span>
+    </div>
+    <div style="margin-top:3rem; font-family:'DM Mono',monospace; font-size:.65rem; color:var(--muted); letter-spacing:.12em;">
+      CAPABILITY DEVELOPMENT DOCUMENT · JAN 2025
+    </div>
+  </div>
+
+  <!-- ── SLIDE 02: THE PROBLEM ───────────────────────── -->
+  <div class="slide" id="slide-2">
+    <div class="slide-label">01 — Problem Statement</div>
+    <div class="slide-title">Military Regulations Are<br><span class="red">Killing Readiness</span></div>
+    <div class="slide-sub" style="margin-bottom:1.5rem;">
+      Static documents written for compliance — not execution. The result: blind spots that cascade into operational disasters.
+    </div>
+    <div class="card-grid cols-3" style="margin-top:1.2rem;">
+      <div class="card red-border">
+        <div class="card-icon">⚠️</div>
+        <div class="card-head red" style="font-size:.72rem;">Ambiguous Standards</div>
+        <div class="card-body">"Trained and qualified" — with no measurable criteria. Every unit interprets differently.</div>
+      </div>
+      <div class="card red-border">
+        <div class="card-icon">🏚️</div>
+        <div class="card-head red" style="font-size:.72rem;">Fragmented Oversight</div>
+        <div class="card-body">Siloed responsibility across Army Safety, DDESB, EOD — no accountability crosswalk.</div>
+      </div>
+      <div class="card red-border">
+        <div class="card-icon">🔴</div>
+        <div class="card-head red" style="font-size:.72rem;">Execution Gaps</div>
+        <div class="card-body">No linkage between regulatory text and executable operational tasks. Policy ends where action begins.</div>
+      </div>
+      <div class="card red-border">
+        <div class="card-icon">🧠</div>
+        <div class="card-head red" style="font-size:.72rem;">Historical Blindness</div>
+        <div class="card-body">No institutional memory of why regulations changed or what failures they were meant to prevent.</div>
+      </div>
+      <div class="card red-border">
+        <div class="card-icon">🚨</div>
+        <div class="card-head red" style="font-size:.72rem;">Reactive Culture</div>
+        <div class="card-body">Organizations respond to disasters instead of preventing them. By design, we arrive too late.</div>
+      </div>
+      <div class="card" style="background:transparent; border-style:dashed; display:flex; align-items:center; justify-content:center;">
+        <div style="text-align:center; font-size:.8rem; color:var(--muted); line-height:1.5;">
+          These are not<br><strong style="color:var(--text);">execution failures.</strong><br>They are<br><strong style="color:var(--red);">policy failures.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 03: BLIND SPOT CASCADE ───────────────── -->
+  <div class="slide" id="slide-3">
+    <div class="slide-label">02 — How Disasters Happen</div>
+    <div class="slide-title">The Blind Spot Cascade</div>
+    <div class="slide-sub" style="margin-bottom:.5rem;">Regulatory blind spots don't cause immediate failure. They degrade slowly — then collapse all at once.</div>
+    <div class="loop">
+      <div class="loop-step">
+        <div class="loop-num">Stage 01</div>
+        <div class="loop-name" style="color:var(--orange);">Gap Written</div>
+        <div class="loop-desc">Vague language enters regulation at conception</div>
+      </div>
+      <div class="loop-step">
+        <div class="loop-num">Stage 02</div>
+        <div class="loop-name" style="color:var(--orange);">Interpretation Diverges</div>
+        <div class="loop-desc">Units fill gaps based on tempo, not safety</div>
+      </div>
+      <div class="loop-step">
+        <div class="loop-num">Stage 03</div>
+        <div class="loop-name" style="color:var(--red);">Norm Becomes Doctrine</div>
+        <div class="loop-desc">Bad practice institutionalized across commands</div>
+      </div>
+      <div class="loop-step">
+        <div class="loop-num">Stage 04</div>
+        <div class="loop-name" style="color:var(--red);">Blindness</div>
+        <div class="loop-desc">Original standard forgotten. Hazard invisible.</div>
+      </div>
+      <div class="loop-step danger">
+        <div class="loop-num">Stage 05</div>
+        <div class="loop-name">Disaster</div>
+        <div class="loop-desc">System collapses. Investigation finds proximate cause. Root cause survives.</div>
+      </div>
+    </div>
+    <div class="interrupt">◉ INTERRUPT AT STAGE 01 OR 02 — NOT AFTER</div>
+    <div style="margin-top:1.2rem; font-size:.8rem; color:var(--muted); text-align:center;">
+      Agent Blaze operates at policy conception — the only point where prevention is still possible.
+    </div>
+  </div>
+
+  <!-- ── SLIDE 04: DOMAIN CONSEQUENCES ──────────────── -->
+  <div class="slide" id="slide-4">
+    <div class="slide-label">03 — Explosive Safety Domain</div>
+    <div class="slide-title">The Failures Are<br><span class="red">Already Happening</span></div>
+    <div class="compare">
+      <div class="compare-col bad">
+        <div class="compare-head">Current State — Explosive Safety</div>
+        <div class="compare-item"><span class="dot">▸</span><span>Persistent ESMP non-compliance across installations</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Under-staffed 0017 billet (explosive safety specialists)</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Ammunition authorization disconnected from safety review</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Unsynchronized interagency transportation standards</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>No formalized explosive safety workforce pipeline</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Investigations stop at proximate cause — never root cause</span></div>
+      </div>
+      <div class="compare-col good">
+        <div class="compare-head">With Agent Blaze</div>
+        <div class="compare-item"><span class="dot">▸</span><span>Compliance gaps surfaced before installation review</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Billet requirements automatically extracted from regulations</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Authorization workflows linked to regulatory safety requirements</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Cross-agency standard conflicts flagged at publication</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Training pipeline auto-generated from regulatory requirements</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Policy-level root causes traced and eliminated</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 05: PARADIGM SHIFT ────────────────────── -->
+  <div class="slide" id="slide-5">
+    <div class="slide-label">04 — The Blaze Approach</div>
+    <div class="big-statement">
+      Policy is not guidance.<br>
+      <span class="red">Policy IS execution.</span><br>
+      <span style="color:var(--muted); font-size:.75em;">Blind spots must die at conception.</span>
+    </div>
+    <div class="compare" style="margin-top:2rem;">
+      <div class="compare-col bad" style="padding:1rem 1.25rem;">
+        <div class="compare-head" style="margin-bottom:.6rem;">Traditional Paradigm</div>
+        <div class="compare-item"><span class="dot">▸</span><span>Policy provides guidance; execution fills gaps</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Compliance checked after implementation</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Reactive — responds to failures</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Static documents, no executable mapping</span></div>
+      </div>
+      <div class="compare-col good" style="padding:1rem 1.25rem;">
+        <div class="compare-head" style="margin-bottom:.6rem;">Blaze Paradigm</div>
+        <div class="compare-item"><span class="dot">▸</span><span>Policy IS execution — gaps eliminated at creation</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Intelligence applied before publication</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Proactive — prevents disasters</span></div>
+        <div class="compare-item"><span class="dot">▸</span><span>Regulations converted to task workflows</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 06: CORE CAPABILITIES ────────────────── -->
+  <div class="slide" id="slide-6">
+    <div class="slide-label">05 — Capability Architecture</div>
+    <div class="slide-title">Four Intelligence Engines</div>
+    <div class="card-grid cols-2" style="max-width:900px; gap:1.2rem; margin-top:1.5rem;">
+      <div class="card accent-border">
+        <div class="card-icon">🔍</div>
+        <div class="card-head" style="color:var(--accent);">Regulatory Intelligence Engine</div>
+        <div class="card-body">Track full regulation lifecycle · Detect what's unsaid, undefined, or unaccountable · Cross-regulation conflict mapping · Flag vague language and unmeasurable standards</div>
+      </div>
+      <div class="card" style="border-color:#2a4a1a;">
+        <div class="card-icon">⚙️</div>
+        <div class="card-head" style="color:var(--green);">Execution Intelligence</div>
+        <div class="card-body">Parse regulations into explicit, implied, and enabling tasks · Link tasks to units, billets, and workflows · Surface missing tasks · Trace requirements to responsible agency and role</div>
+      </div>
+      <div class="card red-border">
+        <div class="card-icon">🛡️</div>
+        <div class="card-head" style="color:var(--red);">Strategic Risk Prevention</div>
+        <div class="card-body">Model 2nd and 3rd order effects of regulatory gaps · Identify policy configurations that create operational vulnerability · Connect blind spots to broader strategic risk patterns</div>
+      </div>
+      <div class="card" style="border-color:#3a2a1a;">
+        <div class="card-icon">📚</div>
+        <div class="card-head" style="color:var(--orange);">Training Intelligence</div>
+        <div class="card-body">Auto-generate handbooks, job aids, curricula from regulations · Adult learning integration · Real-world scenario generation · Assessment tools to measure comprehension</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 07: MVP SCOPE ─────────────────────────── -->
+  <div class="slide" id="slide-7">
+    <div class="slide-label">06 — Initial Operating Capability</div>
+    <div class="slide-title">MVP: Explosive Safety Domain</div>
+    <div class="slide-sub">Start focused. Prove the model. Scale the win.</div>
+    <div class="card-grid cols-2" style="max-width:860px; margin-top:1.5rem; gap:1rem;">
+      <div class="card">
+        <div class="card-head" style="color:var(--muted); font-size:.65rem; letter-spacing:.12em;">Target Regulations</div>
+        <div style="margin-top:.6rem; display:flex; flex-direction:column; gap:.45rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:.4rem .5rem; background:var(--bg); border-radius:4px;">
+            <span style="font-family:'DM Mono',monospace; font-size:.75rem; color:var(--text);">AR 385-10</span>
+            <span style="font-size:.7rem; color:var(--muted);">Army Safety Program</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:.4rem .5rem; background:var(--bg); border-radius:4px;">
+            <span style="font-family:'DM Mono',monospace; font-size:.75rem; color:var(--text);">DA PAM 385-64</span>
+            <span style="font-size:.7rem; color:var(--muted);">Ammunition &amp; Explosives Safety</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:.4rem .5rem; background:var(--bg); border-radius:4px;">
+            <span style="font-family:'DM Mono',monospace; font-size:.75rem; color:var(--text);">DESR 6055.09</span>
+            <span style="font-size:.7rem; color:var(--muted);">DoD Explosive Safety</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:.4rem .5rem; background:var(--bg); border-radius:4px;">
+            <span style="font-family:'DM Mono',monospace; font-size:.75rem; color:var(--text);">AR 700-28</span>
+            <span style="font-size:.7rem; color:var(--muted);">Reporting of Ammunition Incidents</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head" style="color:var(--muted); font-size:.65rem; letter-spacing:.12em;">Core MVP Functions</div>
+        <div style="margin-top:.6rem; display:flex; flex-direction:column; gap:.5rem;">
+          <div class="compare-item"><span class="dot" style="color:var(--red);">▸</span><span style="font-size:.8rem; color:var(--text);">Regulatory ingestion &amp; gap identification</span></div>
+          <div class="compare-item"><span class="dot" style="color:var(--red);">▸</span><span style="font-size:.8rem; color:var(--text);">Blind spot detection &amp; ambiguity flagging</span></div>
+          <div class="compare-item"><span class="dot" style="color:var(--red);">▸</span><span style="font-size:.8rem; color:var(--text);">Task hierarchy generation from regulatory text</span></div>
+          <div class="compare-item"><span class="dot" style="color:var(--red);">▸</span><span style="font-size:.8rem; color:var(--text);">Job aid &amp; training material creation</span></div>
+          <div class="compare-item" style="border:none;"><span class="dot" style="color:var(--red);">▸</span><span style="font-size:.8rem; color:var(--text);">Commander compliance &amp; risk dashboard</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 08: METRICS ───────────────────────────── -->
+  <div class="slide" id="slide-8">
+    <div class="slide-label">07 — Success Metrics</div>
+    <div class="slide-title">What Success Looks Like</div>
+    <div class="metric-list">
+      <div class="metric-row">
+        <div class="metric-label">Compliance gap identification speed</div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" style="width:50%;"></div></div>
+        <div class="metric-val">50% faster</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">ESMP development time</div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" style="width:60%; background:var(--orange);"></div></div>
+        <div class="metric-val" style="color:var(--orange);">60% reduction</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Regulatory ambiguities converted to measurable standards</div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" style="width:90%; background:var(--accent);"></div></div>
+        <div class="metric-val" style="color:var(--accent);">90% converted</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Training development time for explosive safety requirements</div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" style="width:75%; background:var(--green);"></div></div>
+        <div class="metric-val" style="color:var(--green);">75% reduction</div>
+      </div>
+    </div>
+    <div class="tags" style="margin-top:1.5rem;">
+      <span class="tag">Commanders: clear executable guidance</span>
+      <span class="tag">Policy writers: real-time feedback</span>
+      <span class="tag">Auditors: traceable policy gaps</span>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 09: ROADMAP ───────────────────────────── -->
+  <div class="slide" id="slide-9">
+    <div class="slide-label">08 — Implementation Roadmap</div>
+    <div class="slide-title">36-Month Path to<br>Enterprise Capability</div>
+    <div class="timeline">
+      <div class="phase">
+        <div class="phase-dot"></div>
+        <div class="phase-num">Phase 01</div>
+        <div class="phase-time">Months 1–6</div>
+        <div class="phase-desc">Proof of Concept<br><br>MVP for explosive safety · Pilot 3–5 installations · Validate blind spot detection</div>
+      </div>
+      <div class="phase">
+        <div class="phase-dot"></div>
+        <div class="phase-num">Phase 02</div>
+        <div class="phase-time">Months 7–12</div>
+        <div class="phase-desc">Limited Deployment<br><br>Expand to munitions ops · Integrate with training systems · Refine on user feedback</div>
+      </div>
+      <div class="phase">
+        <div class="phase-dot"></div>
+        <div class="phase-num">Phase 03</div>
+        <div class="phase-time">Months 13–24</div>
+        <div class="phase-desc">Enterprise Capability<br><br>Army-wide explosive safety · Expand regulatory domains · Establish as standard practice</div>
+      </div>
+      <div class="phase">
+        <div class="phase-dot"></div>
+        <div class="phase-num">Phase 04</div>
+        <div class="phase-time">Months 25–36</div>
+        <div class="phase-desc">Strategic Integration<br><br>Connect with FISK platform · Joint &amp; interagency domains · Export to allied militaries</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 10: INVESTMENT & ROI ─────────────────── -->
+  <div class="slide" id="slide-10">
+    <div class="slide-label">09 — Resource Requirements</div>
+    <div class="slide-title">Investment vs. <span class="red">Inaction</span></div>
+    <table class="roi-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Phase</th>
+          <th>Investment</th>
+          <th>Return / Impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">Year 1</td>
+          <td>MVP + Pilot</td>
+          <td>$3–5M</td>
+          <td class="highlight">Proof of blind spot prevention in explosive safety</td>
+        </tr>
+        <tr>
+          <td class="mono">Year 2</td>
+          <td>Limited Deployment</td>
+          <td>$5–8M</td>
+          <td class="highlight">60% faster ESMP development · thousands of hours saved</td>
+        </tr>
+        <tr>
+          <td class="mono">Year 3</td>
+          <td>Enterprise</td>
+          <td>$8–12M</td>
+          <td class="highlight">Army-wide deployment · prevented strategic disasters</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="card-grid cols-3" style="max-width:860px; margin-top:1.2rem;">
+      <div class="card" style="text-align:center; padding:1rem;">
+        <div style="font-size:1.4rem; font-weight:900; color:var(--red);">$50–100M+</div>
+        <div class="card-body" style="margin-top:.3rem;">Value of a single prevented explosive accident</div>
+      </div>
+      <div class="card" style="text-align:center; padding:1rem;">
+        <div style="font-size:1.4rem; font-weight:900; color:var(--orange);">75%</div>
+        <div class="card-body" style="margin-top:.3rem;">Reduction in training development costs</div>
+      </div>
+      <div class="card" style="text-align:center; padding:1rem;">
+        <div style="font-size:1.4rem; font-weight:900; color:var(--green);">Incalculable</div>
+        <div class="card-body" style="margin-top:.3rem;">Value of prevented strategic disaster</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 11: STRATEGIC VISION ─────────────────── -->
+  <div class="slide" id="slide-11">
+    <div class="slide-label">10 — Strategic Vision</div>
+    <div class="slide-title">Beyond Explosive Safety:<br><span class="red">The Full Ecosystem</span></div>
+    <div class="card-grid cols-3" style="max-width:900px; margin-top:1.5rem;">
+      <div class="card" style="border-color:#1a3a5a; text-align:center;">
+        <div style="font-family:'DM Mono',monospace; font-size:.65rem; letter-spacing:.14em; color:var(--accent); text-transform:uppercase; margin-bottom:.6rem;">Near Term</div>
+        <div style="font-size:.85rem; font-weight:700; margin-bottom:.5rem;">Regulatory Intelligence</div>
+        <div class="card-body">Eliminate blind spots in explosive safety &amp; munitions operations. Prove the model.</div>
+      </div>
+      <div class="card" style="border-color:#3a1a5a; text-align:center;">
+        <div style="font-family:'DM Mono',monospace; font-size:.65rem; letter-spacing:.14em; color:#a060e0; text-transform:uppercase; margin-bottom:.6rem;">Medium Term</div>
+        <div style="font-size:.85rem; font-weight:700; margin-bottom:.5rem;">Army-Wide Expansion</div>
+        <div class="card-body">Regulatory intelligence embedded across all military domains and policy development processes.</div>
+      </div>
+      <div class="card" style="border-color:#3a1a1a; text-align:center;">
+        <div style="font-family:'DM Mono',monospace; font-size:.65rem; letter-spacing:.14em; color:var(--red); text-transform:uppercase; margin-bottom:.6rem;">Long Term</div>
+        <div style="font-size:.85rem; font-weight:700; margin-bottom:.5rem;">FISK Integration</div>
+        <div class="card-body">Connect with strategic operational risk intelligence for comprehensive disaster prevention at every level.</div>
+      </div>
+    </div>
+    <div class="quote">
+      "Agent Blaze is not just a software capability — it is the beginning of a fundamental transformation in how military institutions prevent strategic failure through intelligence-driven risk elimination."
+    </div>
+  </div>
+
+  <!-- ── SLIDE 12: RECOMMENDATION ───────────────────── -->
+  <div class="slide" id="slide-12">
+    <div class="classification">For Official Use Only</div>
+    <div class="slide-label">Recommendation</div>
+    <div class="blaze-logo" style="font-size:clamp(3rem,6vw,5rem);">APPROVE</div>
+    <div class="slide-sub" style="max-width:620px; margin-top:1rem; font-size:1rem;">
+      Authorize Agent Blaze MVP development focused on explosive safety regulations — with a clear pathway to Army-wide regulatory intelligence.
+    </div>
+    <div style="margin-top:2rem; display:flex; flex-direction:column; gap:.6rem; max-width:560px; width:100%;">
+      <div class="compare-item" style="border-color:var(--border); padding:.5rem .8rem; background:var(--surface); border-radius:4px;">
+        <span class="dot" style="color:var(--green);">▸</span>
+        <span style="font-size:.82rem;">Current process creates blind spots that directly cause preventable disasters</span>
+      </div>
+      <div class="compare-item" style="border-color:var(--border); padding:.5rem .8rem; background:var(--surface); border-radius:4px;">
+        <span class="dot" style="color:var(--green);">▸</span>
+        <span style="font-size:.82rem;">Agent Blaze is the first systematic capability to eliminate blind spots proactively</span>
+      </div>
+      <div class="compare-item" style="border-color:var(--border); padding:.5rem .8rem; background:var(--surface); border-radius:4px; border-bottom:1px solid var(--border);">
+        <span class="dot" style="color:var(--green);">▸</span>
+        <span style="font-size:.82rem;">The cost of NOT having regulatory intelligence far exceeds the cost of development</span>
+      </div>
+    </div>
+    <div class="interrupt" style="margin-top:2rem; font-size:.78rem; padding:.6rem 1.4rem;">
+      ◉ "Strategic risk prevention begins where policy is born."
+    </div>
+  </div>
+
+</div><!-- end #deck -->
+
+<!-- ── NAVIGATION BAR ────────────────────────────────── -->
+<div id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← PREV</button>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+  <span id="slide-counter">01 / 12</span>
+  <button id="btn-next" onclick="changeSlide(1)">NEXT →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function changeSlide(dir) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(total - 1, current + dir));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent =
+      String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+    document.getElementById('progress-fill').style.width =
+      ((current + 1) / total * 100) + '%';
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+  });
+
+  // Init progress bar
+  document.getElementById('progress-fill').style.width =
+    (1 / total * 100) + '%';
+</script>
+</body>
+</html>
